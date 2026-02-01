@@ -1,0 +1,168 @@
+<html>
+
+<head>
+    <title>Be My Valentine? 💓</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<style>
+    *{
+        background-color: rgb(228, 208, 188)
+    }
+    p {
+        text-align: center;
+        font-size: 32px;
+        font-family: Candara, Oswald;
+    }
+    
+    img {
+        display: block;
+        margin: 0 auto;
+        width: min(260px, 70vw);
+        height: auto;
+    }
+    
+    #btn1,
+    #btn2 {
+        position: fixed;
+        top: 70%;
+    }
+    
+    #btn1,
+    #btn2 {
+        padding: 10px 15px;
+        margin: 10px;
+        background-color: crimson;
+        color: aliceblue;
+        font-weight: bolder;
+        border: 1px solid white;
+        border-radius: 20px;
+    }
+    
+    body {
+        background-image: url("");
+    }
+</style>
+
+<body>
+    <br>
+    <p style="background-color: rgb(228, 208, 188); opacity:0.8">Will you be my Valentine?<br></p>
+
+
+    <img src="https://media1.tenor.com/m/rzHI3tqvqqgAAAAC/jiggleduo-love.gif">
+
+
+    <button id="btn1">YES YES!</button>
+    <button id="btn2">NO</button>
+
+</body>
+
+
+
+<script>
+    const button2 = document.getElementById('btn2');
+    const yesButton = document.getElementById('btn1');
+    let hasMoved = false;
+
+    function rectsOverlap(a, b) {
+        return !(
+            a.right < b.left ||
+            a.left > b.right ||
+            a.bottom < b.top ||
+            a.top > b.bottom
+        );
+    }
+
+    function positionButtonsInitially() {
+        const noRect = button2.getBoundingClientRect();
+        const yesRect = yesButton.getBoundingClientRect();
+        const gap = 20;
+        const padding = 12;
+
+        const totalWidth = yesRect.width + gap + noRect.width;
+        const startLeft = (window.innerWidth - totalWidth) / 2;
+        const clampedStartLeft = Math.min(
+            window.innerWidth - totalWidth - padding,
+            Math.max(padding, startLeft)
+        );
+
+        const desiredTop = yesRect.top;
+        const clampedTop = Math.min(
+            window.innerHeight - Math.max(yesRect.height, noRect.height) - padding,
+            Math.max(padding, desiredTop)
+        );
+
+        yesButton.style.left = clampedStartLeft + 'px';
+        yesButton.style.top = clampedTop + 'px';
+        button2.style.left = (clampedStartLeft + yesRect.width + gap) + 'px';
+        button2.style.top = clampedTop + 'px';
+    }
+
+    function moveNoButton() {
+        const rect = button2.getBoundingClientRect();
+        const yesRect = yesButton.getBoundingClientRect();
+        const gap = 20;
+        const paddedYesRect = {
+            left: yesRect.left - gap,
+            top: yesRect.top - gap,
+            right: yesRect.right + gap,
+            bottom: yesRect.bottom + gap
+        };
+        const padding = 12;
+        const maxLeft = Math.max(padding, window.innerWidth - rect.width - padding);
+        const maxTop = Math.max(padding, window.innerHeight - rect.height - padding);
+        let attempts = 0;
+        let newLeft = padding;
+        let newTop = padding;
+
+        while (attempts < 30) {
+            newLeft = Math.floor(Math.random() * (maxLeft - padding + 1)) + padding;
+            newTop = Math.floor(Math.random() * (maxTop - padding + 1)) + padding;
+
+            const candidate = {
+                left: newLeft,
+                top: newTop,
+                right: newLeft + rect.width,
+                bottom: newTop + rect.height
+            };
+
+            if (!rectsOverlap(candidate, paddedYesRect)) {
+                break;
+            }
+
+            attempts += 1;
+        }
+
+        button2.style.left = newLeft + 'px';
+        button2.style.top = newTop + 'px';
+        hasMoved = true;
+    }
+
+    button2.addEventListener('mouseover', moveNoButton);
+    button2.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        moveNoButton();
+    }, { passive: false });
+    button2.addEventListener('click', moveNoButton);
+
+    window.addEventListener('resize', function() {
+        if (hasMoved) {
+            moveNoButton();
+        } else {
+            positionButtonsInitially();
+        }
+    });
+    window.addEventListener('load', positionButtonsInitially);
+    const SMS_ENDPOINT = 'https://bemyvalentine-marjorie.netlify.app/.netlify/functions/sms';
+    yesButton.addEventListener('click', async function() {
+        try {
+            await fetch(SMS_ENDPOINT, { method: 'POST' });
+        } catch (error) {
+            console.error('SMS failed:', error);
+        }
+        alert('\nYAYYY!! 😘💞\n\nLet\'s Celebrate!\nBeach?');
+    });
+</script>
+
+
+</html>
