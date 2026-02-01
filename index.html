@@ -153,7 +153,7 @@
         }
     });
     window.addEventListener('load', positionButtonsInitially);
-    const SMS_ENDPOINT = 'https://valentineask-marjorie.netlify.app/.netlify/functions/sms';
+    const SMS_ENDPOINT = '/sms';
     yesButton.addEventListener('click', async function() {
         try {
             await fetch(SMS_ENDPOINT, { method: 'POST' });

@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const htmlPath = path.join(__dirname, 'Be_My_Valentine.html');
+const htmlPath = path.join(__dirname, 'index.html');
 
 function loadDotEnv() {
     const envPath = path.join(__dirname, '.env');

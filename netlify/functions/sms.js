@@ -1,6 +1,10 @@
 exports.handler = async () => {
     const server = (process.env.NTFY_SERVER || 'https://ntfy.sh').trim();
-    const topic = (process.env.NTFY_TOPIC || '').trim();
+    let topic = (process.env.NTFY_TOPIC || '').trim();
+    const legacyTopic = (process.env.PRIVATE_TOPIC_NAME || '').trim();
+    if (!topic && legacyTopic) {
+        topic = legacyTopic.replace(/^https?:\/\/[^/]+\//, '');
+    }
     const message = (process.env.NTFY_MESSAGE || 'She said YES! 💘').trim();
     const title = (process.env.NTFY_TITLE || 'Valentine Response').trim();
     const token = (process.env.NTFY_TOKEN || '').trim();
