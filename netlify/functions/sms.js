@@ -1,11 +1,21 @@
-exports.handler = async () => {
+exports.handler = async (event) => {
     const server = (process.env.NTFY_SERVER || 'https://ntfy.sh').trim();
     let topic = (process.env.NTFY_TOPIC || '').trim();
     const legacyTopic = (process.env.PRIVATE_TOPIC_NAME || '').trim();
     if (!topic && legacyTopic) {
         topic = legacyTopic.replace(/^https?:\/\/[^/]+\//, '');
     }
-    const message = (process.env.NTFY_MESSAGE || 'She said YES! 💘').trim();
+    let message = (process.env.NTFY_MESSAGE || 'She said YES! 💘').trim();
+    if (event && event.body) {
+        try {
+            const parsed = JSON.parse(event.body);
+            if (parsed && typeof parsed.message === 'string' && parsed.message.trim()) {
+                message = parsed.message.trim();
+            }
+        } catch (error) {
+            // ignore malformed JSON and keep default message
+        }
+    }
     const title = (process.env.NTFY_TITLE || 'Valentine Response').trim();
     const token = (process.env.NTFY_TOKEN || '').trim();
 

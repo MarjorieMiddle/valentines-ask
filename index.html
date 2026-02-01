@@ -38,6 +38,47 @@
         border: 1px solid white;
         border-radius: 20px;
     }
+
+    #confirm-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.35);
+        z-index: 1000;
+    }
+
+    #confirm-box {
+        background-color: #fff6ef;
+        border: 1px solid #caa58d;
+        border-radius: 16px;
+        padding: 16px 18px;
+        min-width: 220px;
+        text-align: center;
+    }
+
+    #confirm-title {
+        font-family: Candara, Oswald;
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+
+    #confirm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    #confirm-yes,
+    #confirm-no {
+        padding: 8px 12px;
+        border: 1px solid white;
+        border-radius: 16px;
+        font-weight: bolder;
+        color: aliceblue;
+        background-color: crimson;
+    }
     
     body {
         background-image: url("");
@@ -54,6 +95,15 @@
 
     <button id="btn1">YES YES!</button>
     <button id="btn2">NO</button>
+    <div id="confirm-modal" aria-hidden="true">
+        <div id="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+            <div id="confirm-title">Are you sure?</div>
+            <div id="confirm-actions">
+                <button id="confirm-yes">YES</button>
+                <button id="confirm-no">NO</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 
@@ -138,12 +188,50 @@
         hasMoved = true;
     }
 
-    button2.addEventListener('mouseover', moveNoButton);
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
+
+    function openConfirm() {
+        confirmModal.style.display = 'flex';
+        confirmModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeConfirm() {
+        confirmModal.style.display = 'none';
+        confirmModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function handleNoInteraction() {
+        moveNoButton();
+        noClickCount += 1;
+        if (noClickCount > 5) {
+            openConfirm();
+        }
+    }
+
+    confirmYes.addEventListener('click', async function() {
+        closeConfirm();
+        await sendNotification('no valentine');
+        window.location.replace('not-found.html');
+    });
+
+    confirmNo.addEventListener('click', function() {
+        closeConfirm();
+    });
+
+    confirmModal.addEventListener('click', function(e) {
+        if (e.target === confirmModal) {
+            closeConfirm();
+        }
+    });
+
+    button2.addEventListener('mouseover', handleNoInteraction);
     button2.addEventListener('touchstart', function(e) {
         e.preventDefault();
-        moveNoButton();
+        handleNoInteraction();
     }, { passive: false });
-    button2.addEventListener('click', moveNoButton);
+    button2.addEventListener('click', handleNoInteraction);
 
     window.addEventListener('resize', function() {
         if (hasMoved) {
@@ -153,15 +241,26 @@
         }
     });
     window.addEventListener('load', positionButtonsInitially);
-    const SMS_ENDPOINT = '/sms';
-    yesButton.addEventListener('click', async function() {
+    const SMS_ENDPOINT = '/.netlify/functions/sms';
+    let noClickCount = 0;
+
+    async function sendNotification(message) {
         try {
-            await fetch(SMS_ENDPOINT, { method: 'POST' });
+            await fetch(SMS_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
         } catch (error) {
-            console.error('SMS failed:', error);
+            console.error('Notification failed:', error);
         }
+    }
+
+    yesButton.addEventListener('click', async function() {
+        await sendNotification('She said YES! 💘');
         alert('\nYAYYY!!\n\nLet\'s Celebrate!\nBeach?');
     });
+
 </script>
 
 
