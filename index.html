@@ -205,7 +205,7 @@
     function handleNoInteraction() {
         moveNoButton();
         noClickCount += 1;
-        if (noClickCount > 5) {
+        if (noClickCount >= 4) {
             openConfirm();
         }
     }
